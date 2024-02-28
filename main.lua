@@ -306,6 +306,6 @@ rougecss = rougecss:release()
 system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'github'},
+    create_new_console = true,
     stdout = rougecss,
-    start_new_session = true
 }:wait()
