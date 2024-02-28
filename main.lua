@@ -152,9 +152,10 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 <meta name="generator" content="super blog machine 0.0.1">
 <title>{title}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="alternate" type="application/feed+json" title="{blog_title}" href="{url}feed.json">
 <style>
 ]],
-        {'title', title}))
+        {'title', title}, {'blog_title', json_conf.title}, {'url', json_conf.baseURL}))
 
     do
         local css_file = file.stream.new()
@@ -224,11 +225,11 @@ stream.write_all(index, format([[
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="super blog machine 0.0.1">
-<title>{blog_title}</title>
+<title>{title}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<link rel="alternate" type="application/feed+json" title="{blog_title}" href="{url}feed.json">
+<link rel="alternate" type="application/feed+json" title="{title}" href="{url}feed.json">
 <style>
-]], {'blog_title', json_conf.title}, {'url', json_conf.baseURL}))
+]], {'title', json_conf.title}, {'url', json_conf.baseURL}))
 
 do
     local css_file = file.stream.new()
@@ -248,11 +249,11 @@ stream.write_all(index, format([[
 </head>
 <body class="article">
 <div id="header">
-<h1>{blog_title}</h1>
+<h1>{title}</h1>
 </div>
 <div id="content">
 <ul>
-]], {'blog_title', json_conf.title}))
+]], {'title', json_conf.title}))
 
 table.sort(posts, function(lhs, rhs) return lhs.path > rhs.path end)
 
@@ -299,12 +300,12 @@ for file in fs.directory_iterator(INPUT / 'static') do
 end
 
 local rougecss = file.stream.new()
-rougecss:open(OUTPUT /  'syntax.css', bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
+rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
 rougecss = rougecss:release()
 
 system.spawn{
     program = 'rougify',
-    arguments = {'rougify', 'style', 'github', '>'},
+    arguments = {'rougify', 'style', 'github'},
     stdout = rougecss,
-	stderr = 'share'
+    start_new_session = true
 }:wait()
