@@ -313,16 +313,10 @@ end
 local rp, wp = pipe.pair()
 wp = wp:release()
 
-local msg = ''
-
-local rougecss = file.stream.new()
-rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-rougecss = rougecss:release()
-
 process = system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
-    stdout = 'share',
+    stdout = wp,
 }
 process:wait()
 print(process.exit_code)
@@ -332,42 +326,6 @@ local rp = stream.scanner.new{
     stream = rp,
 	}
 	
-while true do
-     local msg, err = tostring(rp:get_line())
-	 if not err then
-		print(msg)
-		break
-	 else
-		return
-	 end
-end
-
-local myScannerOpts = {
-    stream = rp,
-    record_separator = "\n", 
-    trim_record = true,      
-}
-
-local myScanner = stream.scanner.new(myScannerOpts)
-
-local lines = {} 
-
-
-while true do
-    local record = myScanner:get_line()
-    if not record then
-        break
-    end
-
-    local line = tostring(record)
-	--print(line)
-
-
-
-
-    table.insert(lines, line)
-	print(lines[2])
-
-
-    myScanner:remove_line()
-end
+local rougecss = file.stream.new()
+rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
+stream.write_all(rougecss, tostring(rp:get_line()))
