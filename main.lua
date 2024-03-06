@@ -319,13 +319,15 @@ local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
 rougecss = rougecss:release()
 
-system.spawn{
+process = system.spawn{
     program = 'rougify',
-    arguments = {'rougify', 'fdfdf'},
+    arguments = {'rougify', 'style', 'syntax', 'github'},
     stdout = rougecss,
     stderr = 'share'
 }
-
+process:wait()
+print(process.exit_code)
+wp:close()
 
 local rp = stream.scanner.new{
     stream = rp,
