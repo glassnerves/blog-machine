@@ -319,12 +319,25 @@ process = system.spawn{
     stdout = wp,
 }
 process:wait()
-print(process.exit_code)
 wp:close()
 
 local rp = stream.scanner.new{
     stream = rp,
 	}
+	
+local lines = {} 	
+
+while true do
+     local msg, err = tostring(rp:get_line())
+	 if not err then
+		table.insert(lines, msg)
+		break
+	 else
+		return
+	 end
+end
+
+print(lines[1])
 	
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
