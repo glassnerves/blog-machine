@@ -321,6 +321,7 @@ process = system.spawn{
 process:wait()
 wp:close()
 
+local msg = ''
 local rp = stream.scanner.new{
     stream = rp,
 	}
@@ -328,15 +329,19 @@ local rp = stream.scanner.new{
 local lines = {} 	
 
 while true do
-     local msg, err = tostring(rp:get_line())
+     msg, err = tostring(rp:get_line())
 	 if not err then
 		table.insert(lines, msg)
+		print(msg)
 		break
 	 else
 		return
 	 end
 end
 
+print(msg)
+print(msg[1])
+print(lines[1])
 print(lines[2])
 	
 local rougecss = file.stream.new()
