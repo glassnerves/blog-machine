@@ -316,7 +316,7 @@ rougecss = rougecss:release()
 
 system.spawn{
     program = 'rougify',
-    arguments = {'rougify', 'style', 'github'},
+    arguments = {'rougify fdfdf'},
     stdout = rougecss,
     stderr = 'share'
 }:wait()
