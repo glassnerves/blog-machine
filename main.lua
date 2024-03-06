@@ -322,8 +322,7 @@ rougecss = rougecss:release()
 process = system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
-    stdout = rougecss,
-    stderr = 'share'
+    stdout = 'share',
 }
 process:wait()
 print(process.exit_code)
