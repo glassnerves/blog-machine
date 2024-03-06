@@ -106,6 +106,10 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 
             '--attribute', 'icons=font',
             '--attribute', 'icon-set=fas',
+			
+            '--require', 'asciidoctor-diagram',
+            '--attribute', 'ditaa-format=svg',
+            '--attribute', 'plantuml-format=svg',
 
             '--attribute', 'source-highlighter=rouge',
 
@@ -120,6 +124,7 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 
             tostring(post.path)
         },
+        environment = system.environment,
         stdout = wp,
         stderr = 'share'
     }
@@ -299,6 +304,12 @@ for file in fs.directory_iterator(INPUT / 'static') do
     fs.copy(file.path, OUTPUT, { existing = 'update' })
 end
 
+for file in fs.directory_iterator(INPUT / 'content') do
+    if file.path.extension == '.svg' then
+        fs.copy(file.path, OUTPUT, { existing = 'update' })
+    end
+end
+
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
 rougecss = rougecss:release()
@@ -306,6 +317,6 @@ rougecss = rougecss:release()
 system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'github'},
-    detached_process = true,
     stdout = rougecss,
+    stderr = 'share'
 }:wait()
