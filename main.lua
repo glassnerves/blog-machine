@@ -337,7 +337,7 @@ while true do
 	 end
 end
 
-print(lines[1])
+print(lines[2])
 	
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
