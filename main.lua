@@ -310,21 +310,16 @@ for file in fs.directory_iterator(INPUT / 'content') do
     end
 end
 
-local rp, wp = pipe.pair()
-wp = wp:release()
 local cu
-local msg = ''
-
-local rougecss = file.stream.new()
-rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-rougecss = rougecss:release()
-
 process = system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
     stdout = cu,
 }
 process:wait()
-print(process.exit_code)
-wp:close()
+
 print(cu)
+
+local rougecss = file.stream.new()
+rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
+stream.write_all(rougecss, tostring(cu))
