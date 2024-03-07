@@ -313,16 +313,12 @@ end
 local rp, wp = pipe.pair()
 wp = wp:release()
 
-local msg = ''
-
-process = system.spawn{
+system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
     stdout = wp,
-}
-process:wait()
+}:process:wait()
 wp:close()
-
 
 local myScannerOpts = {
     stream = rp,
@@ -331,35 +327,20 @@ local myScannerOpts = {
 
 local myScanner = stream.scanner.new(myScannerOpts)
 
-local lines = [[]]  -- Tabela para armazenar as linhas
+local css_output = [[]]
 
--- Lendo e processando cada linha do stream
 while true do
-	local success, record = pcall(function()
-		return myScanner:get_line()
-		end)
+	local success, line = pcall(function()
+	    return myScanner:get_line()
+	end)
 
 	if not success then
 		break
 	end	
 
-
-    --print(tostring(record))
-	lines = lines .. tostring(record)
-	--print(line)
-
-
-
-    -- Adicionando a linha à tabela
-    --table.insert(lines, line)
-
-
-    -- Removendo o registro do buffer
-    myScanner:remove_line()
+	css_output = css_output .. tostring(line)
 end
-
-print(lines)
 
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, tostring(lines))
+stream.write_all(rougecss, css_output)
