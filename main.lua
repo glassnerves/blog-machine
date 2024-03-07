@@ -310,16 +310,51 @@ for file in fs.directory_iterator(INPUT / 'content') do
     end
 end
 
-local cu
+local rp, wp = pipe.pair()
+wp = wp:release()
+
+local msg = ''
+
 process = system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
-    stdout = cu,
+    stdout = wp,
 }
 process:wait()
+wp:close()
 
-print(cu)
 
-local rougecss = file.stream.new()
-rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, tostring(cu))
+local myScannerOpts = {
+    stream = rp,
+}
+
+local myScanner = stream.scanner.new(myScannerOpts)
+
+local lines = [[]]  -- Tabela para armazenar as linhas
+
+-- Lendo e processando cada linha do stream
+while true do
+	local success, record = pcall(function()
+		return myScanner:get_line()
+		end)
+
+	if not success then
+		break
+	end	
+
+
+    --print(tostring(record))
+	lines = lines .. tostring(record)
+	--print(line)
+
+
+
+    -- Adicionando a linha à tabela
+    --table.insert(lines, line)
+
+
+    -- Removendo o registro do buffer
+    myScanner:remove_line()
+end
+
+print(lines)
