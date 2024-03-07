@@ -326,6 +326,7 @@ wp:close()
 
 local myScannerOpts = {
     stream = rp,
+    record_separator = "\n",
 }
 
 local myScanner = stream.scanner.new(myScannerOpts)
@@ -358,3 +359,7 @@ while true do
 end
 
 print(lines)
+
+local rougecss = file.stream.new()
+rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
+stream.write_all(rougecss, tostring(lines))
