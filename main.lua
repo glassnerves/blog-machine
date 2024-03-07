@@ -320,27 +320,14 @@ system.spawn{
 }:wait()
 wp:close()
 
-local myScannerOpts = {
+
+local my_scanner = stream.scanner.new{
     stream = rp,
-    record_separator = "\n",
-}
+	record_separator = '\0',
+	}
 
-local myScanner = stream.scanner.new(myScannerOpts)
-
-local syntax_css_output = [[]]
-
-while true do
-	local success, line = pcall(function()
-	    return myScanner:get_line()
-	end)
-
-	if not success then
-		break
-	end	
-
-	syntax_css_output = syntax_css_output .. tostring(line)
-end
+print(my_scanner:get_line())
 
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, syntax_css_output)
+stream.write_all(rougecss, my_scanner:get_line())
