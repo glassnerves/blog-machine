@@ -317,7 +317,8 @@ system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
     stdout = wp,
-}:process:wait()
+}
+process:wait()
 wp:close()
 
 local myScannerOpts = {
@@ -327,7 +328,7 @@ local myScannerOpts = {
 
 local myScanner = stream.scanner.new(myScannerOpts)
 
-local css_output = [[]]
+local syntax_css_output = [[]]
 
 while true do
 	local success, line = pcall(function()
@@ -338,9 +339,9 @@ while true do
 		break
 	end	
 
-	css_output = css_output .. tostring(line)
+	syntax_css_output = syntax_css_output .. tostring(line)
 end
 
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, css_output)
+stream.write_all(rougecss, syntax_css_output)
