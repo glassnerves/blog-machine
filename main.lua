@@ -317,8 +317,7 @@ system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'syntax', 'github'},
     stdout = wp,
-}
-process:wait()
+}:wait()
 wp:close()
 
 local myScannerOpts = {
