@@ -322,11 +322,9 @@ wp:close()
 
 local rougifyout = stream.scanner.new{
     stream = rougifyout,
-    record_separator = '\0',
+    record_separator = '\n',
     }
-
-local syntax_css_output = rougifyout:get_line()
 
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, syntax_css_output)
+stream.write_all(rougecss, rougifyout:get_line())
