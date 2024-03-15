@@ -110,7 +110,7 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
             '--require', 'asciidoctor-diagram',
             '--attribute', 'ditaa-format=svg',
             '--attribute', 'plantuml-format=svg',
-            '--attribute', 'syntrax=jsyntrax-1.37/bin/syntrax',
+            '--attribute', 'java=jsyntrax-1.37/bin/syntrax',
             '--attribute', 'diagram-nocache-option',
 
             '--attribute', 'source-highlighter=rouge',
