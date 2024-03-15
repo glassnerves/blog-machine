@@ -106,10 +106,12 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 
             '--attribute', 'icons=font',
             '--attribute', 'icon-set=fas',
-			
+
             '--require', 'asciidoctor-diagram',
             '--attribute', 'ditaa-format=svg',
             '--attribute', 'plantuml-format=svg',
+            '--attribute', 'syntrax-format=svg',
+            '--attribute', 'diagram-nocache-option',
 
             '--attribute', 'source-highlighter=rouge',
 
@@ -306,7 +308,7 @@ end
 
 for file in fs.directory_iterator(INPUT / 'content') do
     if file.path.extension == '.svg' then
-        fs.copy(file.path, OUTPUT, { existing = 'update' })
+        fs.rename(file.path,  OUTPUT / file.path.filename)
     end
 end
 
@@ -317,15 +319,31 @@ system.spawn{
     program = 'rougify',
     arguments = {'rougify', 'style', 'github'},
     stdout = wp,
-	stderr = 'share'
+    stderr = 'share'
 }:wait()
 wp:close()
 
+-- Calling line by line instead of using `record_separator='\0'` due to this issue
+-- https://github.com/chriskohlhoff/asio/issues/1442
 local rougifyout = stream.scanner.new{
     stream = rougifyout,
-    record_separator = '\0',
-    }
+    record_separator = '\n',
+}
+
+local syntax_css_output = ''
+
+while true do
+    local ok, line = pcall(function()
+        return rougifyout:get_line()
+    end)
+
+    if not ok then
+        break
+    end
+
+    syntax_css_output = syntax_css_output .. tostring(line)
+end
 
 local rougecss = file.stream.new()
 rougecss:open(fs.path.from_generic('public/syntax.css'), bit.bor(file.open_flag.write_only, file.open_flag.create, file.open_flag.truncate))
-stream.write_all(rougecss, rougifyout:get_line())
+stream.write_all(rougecss, syntax_css_output)
