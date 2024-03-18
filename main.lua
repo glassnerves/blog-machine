@@ -63,6 +63,40 @@ do
     json_conf = json.decode(tostring(buf))
 end
 
+local function generate_documents(document_type, document_extension, post, post_path, output)
+    local p = system.spawn{
+        program = document_type,
+        arguments = {
+            document_type,
+            '--trace', '--verbose',
+            '--base-dir', tostring(fs.current_working_directory() / 'content'),
+
+            '--attribute', 'icons=font',
+            '--attribute', 'icon-set=fas',
+
+            '--require', 'asciidoctor-diagram',
+            '--attribute', 'ditaa-format=svg',
+            '--attribute', 'plantuml-format=svg',
+            '--attribute', 'diagram-nocache-option',
+
+            '--attribute', 'source-highlighter=rouge',	
+
+            '--out-file', tostring(output:replace_filename(post.path.stem .. document_extension)),
+            tostring(post_path)
+        },
+        environment = system.environment,
+        stderr = 'share'
+    }
+    spawn(function()
+        p:wait()
+        if p.exit_code ~= 0 then
+            stream.write_all(
+                system.err, document_type .. 'returned ' .. p.exit_code .. '\n')
+                system.exit(1)
+        end
+    end):detach()
+end
+
 local posts = {}
 
 for post in fs.directory_iterator(INPUT / 'content' / 'post') do
@@ -110,8 +144,6 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
             '--require', 'asciidoctor-diagram',
             '--attribute', 'ditaa-format=svg',
             '--attribute', 'plantuml-format=svg',
---            '--attribute', 'java=C:/Program Files/OpenJDK/java.exe',
---            '--attribute', 'syntrax=jsyntrax-1.37/bin/syntrax.bat',
             '--attribute', 'diagram-nocache-option',
 
             '--attribute', 'source-highlighter=rouge',
@@ -211,6 +243,14 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 
     stream.write_all(output_file, format([[
 </div>
+</ul>
+</div>
+<div id="download-options" style="text-align: center; margin-top: 20px;">
+  <p style="font-size: 14px;">Download Article:
+    <a style="font-size: 12px; href="{url_pdf}">PDF</a> |
+    <a style="font-size: 12px; href="{url_epub}">EPUB</a>
+  </p>
+</div>
 <div id="footer">
 <div id="footer-text">
 {footer}
@@ -218,7 +258,15 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 </div>
 </body>
 </html>
-]], {'footer', json_conf.footerText}))
+]], {'url_pdf', json_conf.baseURL .. '/' .. tostring(output:replace_filename(post.path.stem .. '.pdf'))}, 
+	{'url_epub', json_conf.baseURL .. post.path:to_generic() .. '/' .. post.path.stem .. '.epub'},
+{'footer', json_conf.footerText}))
+
+    local dArgs = {{"asciidoctor-pdf", ".pdf"}, {"asciidoctor-epub3", ".epub"}}
+
+    for _, v in pairs(dArgs) do
+        generate_documents(v[1], v[2], post, post.path, output)
+    end
 
     ::continue::
 end
@@ -271,7 +319,9 @@ for _, v in ipairs(posts) do
     json_feed.items[#json_feed.items + 1] = {
         id = v.path:to_generic(),
         title = tostring(v.title),
-        url = json_conf.baseURL .. v.path:to_generic() .. '/'
+        url = json_conf.baseURL .. v.path:to_generic() .. '/',
+        pdf = json_conf.baseURL .. v.path:to_generic() .. '/' .. v.path.stem .. '.pdf',
+        epub = json_conf.baseURL .. v.path:to_generic() .. '/' .. v.path.stem .. '.epub'
     }
     stream.write_all(
         index,
