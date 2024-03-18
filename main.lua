@@ -258,7 +258,8 @@ for post in fs.directory_iterator(INPUT / 'content' / 'post') do
 </div>
 </body>
 </html>
-]], {'url_pdf', json_conf.baseURL .. '/' .. tostring(output:replace_filename(post.path.stem .. '.pdf'))}, 
+]], {'url_pdf', json_conf.baseURL .. '/' .. tostring(output.parent_path:lexically_relative(OUTPUT)) 
+.. '/' .. tostring(output:replace_filename(post.path.stem .. '.pdf'))}, 
 	{'url_epub', json_conf.baseURL .. post.path:to_generic() .. '/' .. post.path.stem .. '.epub'},
 {'footer', json_conf.footerText}))
 
